@@ -11,7 +11,51 @@ import SKYKit
 
 class PhotoHelper {
     
-    func resize(image: UIImage, maxWidth: CGFloat, quality: CGFloat = 1.0) -> UIImage? {
+    static let container = SKYContainer.default()!
+    static let publicDB = SKYContainer.default().publicCloudDatabase!
+    
+    static func upload(imageUrl: URL, onCompletion: @escaping (_ succeeded: Bool) -> Void) {
+        guard let asset = SKYAsset(name: "FeedImage",fileURL: imageUrl) else {
+            onCompletion(false)
+            return
+        }
+        
+        asset.mimeType = "image/png"
+        container.uploadAsset(asset, completionHandler: { uploadedAsset, error in
+            if let error = error {
+                print("Error uploading asset: \(error)")
+                onCompletion(false)
+            } else {
+                if let uploadedAsset = uploadedAsset {
+                    print("Asset uploaded: \(uploadedAsset)")
+                }
+                onCompletion(true)
+            }
+        })
+    }
+    
+    static func upload(imageData: Data, onCompletion: @escaping (_ succeeded: Bool) -> Void) {
+        guard let asset = SKYAsset(data: imageData) else {
+            onCompletion(false)
+            return
+        }
+        
+        asset.mimeType = "image/jpg"
+        container.uploadAsset(asset, completionHandler: { uploadedAsset, error in
+            if let error = error {
+                print("Error uploading asset: \(error)")
+                onCompletion(false)
+            } else {
+                if let uploadedAsset = uploadedAsset {
+                    print("Asset uploaded: \(uploadedAsset)")
+                }
+                onCompletion(true)
+            }
+        })
+    }
+    
+    
+    static func resize(image: UIImage, maxWidth: CGFloat, quality: CGFloat = 1.0) -> Data? {
         var actualWidth = image.size.width
         var actualHeight = image.size.height
         let heightRatio = actualHeight / actualWidth
@@ -33,7 +77,9 @@ class PhotoHelper {
                 return nil
         }
         
-        return UIImage(data: imageData)
+        return imageData
+        
+//        return UIImage(data: imageData)
     }
     
 }

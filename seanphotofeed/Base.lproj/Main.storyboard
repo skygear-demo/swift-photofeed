@@ -137,7 +137,7 @@
         <!--Home-->
         <scene sceneID="ins-vX-IqM">
             <objects>
-                <tableViewController id="LN1-q8-UU8" sceneMemberID="viewController">
+                <tableViewController id="LN1-q8-UU8" customClass="HomeController" customModule="seanphotofeed" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="erL-wT-y43">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -147,7 +147,7 @@
                                 <rect key="frame" x="0.0" y="28" width="320" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="6sG-o0-8ez" id="FTR-k5-wKk">
-                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableViewCellContentView>
                             </tableViewCell>
@@ -159,7 +159,11 @@
                     </tableView>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Home" id="aWB-kM-As5">
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="vrR-t7-eNB"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="vrR-t7-eNB">
+                            <connections>
+                                <action selector="uploadButtonTapped:" destination="LN1-q8-UU8" id="78i-Df-vtZ"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </tableViewController>
