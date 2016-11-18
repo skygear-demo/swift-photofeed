@@ -16,6 +16,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var signupButton: UIButton!
     @IBOutlet weak var logoutButton: UIButton!
     @IBOutlet weak var loginStatusLabel: UILabel!
+    
+    @IBOutlet weak var proceedButton: UIBarButtonItem!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,9 +25,11 @@ class ViewController: UIViewController {
         self.updateLoginStatus()
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Remove text from back button on next controller
+        let backBarButtonItem = UIBarButtonItem()
+        backBarButtonItem.title = ""
+        navigationItem.backBarButtonItem = backBarButtonItem
     }
     
     func updateLoginStatus() {
@@ -34,12 +38,19 @@ class ViewController: UIViewController {
             loginButton.isEnabled = false
             signupButton.isEnabled = false
             logoutButton.isEnabled = true
+            
+            proceedButton.title = "Proceed"
+            proceedButton.isEnabled = true
         } else {
             loginStatusLabel.text = "Not logged in"
             loginButton.isEnabled = true
             signupButton.isEnabled = true
             logoutButton.isEnabled = false
+            
+            proceedButton.title = ""
+            proceedButton.isEnabled = false
         }
+        
     }
     
     func showAlert(_ error: NSError) {
@@ -81,5 +92,10 @@ class ViewController: UIViewController {
             self.updateLoginStatus()
         }
     }
+    
+    @IBAction func proceedButtonTapped(_ sender: Any) {
+        performSegue(withIdentifier: "login_to_home_segue", sender: self)
+    }
+    
 }
 
