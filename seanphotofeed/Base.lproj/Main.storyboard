@@ -6,6 +6,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -138,18 +139,45 @@
         <scene sceneID="ins-vX-IqM">
             <objects>
                 <tableViewController id="LN1-q8-UU8" customClass="HomeController" customModule="seanphotofeed" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="erL-wT-y43">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="367" sectionHeaderHeight="28" sectionFooterHeight="28" id="erL-wT-y43">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="6sG-o0-8ez">
-                                <rect key="frame" x="0.0" y="28" width="320" height="44"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="PhotoCell" rowHeight="367" id="6sG-o0-8ez" customClass="PhotoTableViewCell" customModule="seanphotofeed" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="28" width="320" height="367"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="6sG-o0-8ez" id="FTR-k5-wKk">
-                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="366"/>
                                     <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="atQ-YM-QKh">
+                                            <rect key="frame" x="0.0" y="0.0" width="320" height="320"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" secondItem="atQ-YM-QKh" secondAttribute="height" multiplier="1:1" id="yXJ-dW-VZx"/>
+                                            </constraints>
+                                        </imageView>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="3 Likes" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2Jr-ET-jBQ">
+                                            <rect key="frame" x="16" y="332" width="288" height="14.5"/>
+                                            <fontDescription key="fontDescription" type="system" weight="medium" pointSize="13"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstAttribute="trailing" secondItem="2Jr-ET-jBQ" secondAttribute="trailing" constant="16" id="2Hu-wp-Mbd"/>
+                                        <constraint firstItem="atQ-YM-QKh" firstAttribute="leading" secondItem="FTR-k5-wKk" secondAttribute="leading" id="C6J-gW-JBE"/>
+                                        <constraint firstItem="2Jr-ET-jBQ" firstAttribute="leading" secondItem="FTR-k5-wKk" secondAttribute="leading" constant="16" id="SdJ-ts-fxk"/>
+                                        <constraint firstAttribute="trailing" secondItem="atQ-YM-QKh" secondAttribute="trailing" id="SeP-6M-pFw"/>
+                                        <constraint firstItem="atQ-YM-QKh" firstAttribute="top" secondItem="FTR-k5-wKk" secondAttribute="top" id="c9w-Fe-hqm"/>
+                                        <constraint firstAttribute="bottom" secondItem="2Jr-ET-jBQ" secondAttribute="bottom" constant="20" id="dLB-Cv-mWy"/>
+                                        <constraint firstItem="2Jr-ET-jBQ" firstAttribute="top" secondItem="atQ-YM-QKh" secondAttribute="bottom" constant="12" id="e52-go-C57"/>
+                                    </constraints>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="likesLabel" destination="2Jr-ET-jBQ" id="ouk-vy-qkS"/>
+                                    <outlet property="photoView" destination="atQ-YM-QKh" id="0hR-Rt-wIG"/>
+                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -169,7 +197,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="K1b-jm-1yV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1849" y="650"/>
+            <point key="canvasLocation" x="1848.75" y="649.64788732394368"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="28p-Pi-fdU">
@@ -188,5 +216,8 @@
             <point key="canvasLocation" x="54" y="650"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Placeholder" width="414" height="300"/>
+    </resources>
     <color key="tintColor" red="0.043137254901960784" green="0.74117647058823533" blue="0.45098039215686275" alpha="1" colorSpace="calibratedRGB"/>
 </document>
