@@ -9,9 +9,10 @@
 import UIKit
 
 class Photo {
-    var likes: Int = 0
-    var imageString: String?
     
+    var imageUrlString: String?
+    
+    var likes: Int = 0
     var likesToString: String {
         get {
             if likes == 0 {
@@ -24,8 +25,8 @@ class Photo {
         }
     }
     
-    init(imageString: String) {
-        self.imageString = imageString
+    init(imageUrlString: String) {
+        self.imageUrlString = imageUrlString
     }
     
 }

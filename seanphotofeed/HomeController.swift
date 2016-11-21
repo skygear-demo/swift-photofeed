@@ -13,9 +13,22 @@ class HomeController: UITableViewController {
     
     var photos = [Photo]()
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        initialize()
+        reloadPhotos()
+    }
+    
+    func initialize() {
+        let photo1 = Photo(imageUrlString: "https://c8.staticflickr.com/6/5324/9448738591_8ca45b5ea5_b.jpg")
+        let photo2 = Photo(imageUrlString: "https://c1.staticflickr.com/1/339/19642117288_f58320ce49_b.jpg")
+        let photo3 = Photo(imageUrlString: "https://c8.staticflickr.com/8/7368/16428486631_284ec96742_b.jpg")
+        photos = [photo1, photo2, photo3]
+    }
     
     func reloadPhotos() {
-        
+        tableView.reloadData()
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -23,12 +36,26 @@ class HomeController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        return photos.count
-        return 3
+        return photos.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "PhotoCell", for: indexPath) as! PhotoTableViewCell
+        
+        let photo = photos[indexPath.row]
+        cell.likesLabel.text = photo.likesToString
+        
+        if let imageUrlString = photo.imageUrlString,
+            let imageUrl = URL(string: imageUrlString) {
+            URLSession.shared.dataTask(with: imageUrl) { data, response, error in
+                if let imageData = data {
+                    DispatchQueue.main.async {
+                        cell.photoView.image = UIImage(data: imageData)
+                    }
+                }
+            }.resume()
+        }
+        
         return cell
     }
     

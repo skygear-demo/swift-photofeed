@@ -1,5 +1,5 @@
 use_frameworks!
 
 target 'seanphotofeed' do
-  pod 'SKYKit', '~> 0.13.0'
+  pod 'SKYKit', '~> 0.19.0'
 end
