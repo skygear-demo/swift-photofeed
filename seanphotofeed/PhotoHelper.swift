@@ -14,6 +14,37 @@ class PhotoHelper {
     static let container = SKYContainer.default()!
     static let publicDB = SKYContainer.default().publicCloudDatabase!
     
+    static func retrieveAll(onCompletion: @escaping (_ result: [Photo]) -> Void) {
+        let query = SKYQuery(recordType: "photo", predicate: nil)
+//        let sortDescriptor = NSSortDescriptor(key: "created_at", ascending: false)
+//        query?.sortDescriptors = [sortDescriptor]
+        
+        var photos = [Photo]()
+        
+        publicDB.perform(query!, completionHandler: { assets, error in
+            if let error = error {
+                print("Error retrieving photos: \(error)")
+                onCompletion(photos)
+            } else {
+                guard let assets = assets else {
+                    onCompletion(photos)
+                    return
+                }
+                for asset in assets {
+                    guard let record = asset as? SKYRecord,
+                        let likes = record.object(forKey: "likes") as? Int,
+                        let imageAsset = record.object(forKey: "asset") as? SKYAsset else {
+                        continue
+                    }
+                    let photo = Photo(imageUrl: imageAsset.url)
+                    photo.likes = likes
+                    photos.append(photo)
+                }
+                onCompletion(photos)
+            }
+        })
+    }
+    
     static func upload(imageData: Data, onCompletion: @escaping (_ succeeded: Bool) -> Void) {
         guard let asset = SKYAsset(data: imageData) else {
             onCompletion(false)
@@ -35,14 +66,17 @@ class PhotoHelper {
                         if let error = error {
                             // Error saving
                             print("Error saving record: \(error)")
+                            onCompletion(false)
                         } else {
                             if let recordID = record?.recordID {
                                 print("Saved recor with RecordID: \(recordID)")
+                                onCompletion(true)
                             }
                         }
                     })
+                } else {
+                    onCompletion(false)
                 }
-                onCompletion(true)
             }
         })
     }
@@ -71,8 +105,6 @@ class PhotoHelper {
         }
         
         return imageData
-        
-//        return UIImage(data: imageData)
     }
     
 }

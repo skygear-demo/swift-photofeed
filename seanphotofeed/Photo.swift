@@ -10,7 +10,7 @@ import UIKit
 
 class Photo {
     
-    var imageUrlString: String?
+    var imageUrl: URL?
     
     var likes: Int = 0
     var likesToString: String {
@@ -25,8 +25,8 @@ class Photo {
         }
     }
     
-    init(imageUrlString: String) {
-        self.imageUrlString = imageUrlString
+    init(imageUrl: URL) {
+        self.imageUrl = imageUrl
     }
     
 }
