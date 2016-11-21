@@ -14,26 +14,6 @@ class PhotoHelper {
     static let container = SKYContainer.default()!
     static let publicDB = SKYContainer.default().publicCloudDatabase!
     
-    static func upload(imageUrl: URL, onCompletion: @escaping (_ succeeded: Bool) -> Void) {
-        guard let asset = SKYAsset(name: "FeedImage",fileURL: imageUrl) else {
-            onCompletion(false)
-            return
-        }
-        
-        asset.mimeType = "image/png"
-        container.uploadAsset(asset, completionHandler: { uploadedAsset, error in
-            if let error = error {
-                print("Error uploading asset: \(error)")
-                onCompletion(false)
-            } else {
-                if let uploadedAsset = uploadedAsset {
-                    print("Asset uploaded: \(uploadedAsset)")
-                }
-                onCompletion(true)
-            }
-        })
-    }
-    
     static func upload(imageData: Data, onCompletion: @escaping (_ succeeded: Bool) -> Void) {
         guard let asset = SKYAsset(data: imageData) else {
             onCompletion(false)
@@ -48,6 +28,19 @@ class PhotoHelper {
             } else {
                 if let uploadedAsset = uploadedAsset {
                     print("Asset uploaded: \(uploadedAsset)")
+                    let photo = SKYRecord(recordType: "photo")
+                    photo?.setObject(0, forKey: "likes" as NSCopying)
+                    photo?.setObject(uploadedAsset, forKey: "asset" as NSCopying)
+                    publicDB.save(photo!, completion: { record, error in
+                        if let error = error {
+                            // Error saving
+                            print("Error saving record: \(error)")
+                        } else {
+                            if let recordID = record?.recordID {
+                                print("Saved recor with RecordID: \(recordID)")
+                            }
+                        }
+                    })
                 }
                 onCompletion(true)
             }

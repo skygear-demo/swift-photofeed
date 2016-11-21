@@ -197,7 +197,7 @@
                     </tableView>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Home" id="aWB-kM-As5">
-                        <barButtonItem key="rightBarButtonItem" enabled="NO" systemItem="add" id="vrR-t7-eNB">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="vrR-t7-eNB">
                             <connections>
                                 <action selector="uploadButtonTapped:" destination="LN1-q8-UU8" id="78i-Df-vtZ"/>
                             </connections>

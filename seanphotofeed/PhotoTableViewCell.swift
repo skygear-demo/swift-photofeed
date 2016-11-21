@@ -16,7 +16,6 @@ class PhotoTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        print("Awake from nib")
         
         let doubleTap = UITapGestureRecognizer(target: self, action: #selector(doubleTapped(sender:)))
         doubleTap.numberOfTapsRequired = 2
