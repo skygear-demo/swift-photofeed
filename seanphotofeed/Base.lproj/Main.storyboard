@@ -148,10 +148,10 @@
                                 <rect key="frame" x="0.0" y="28" width="320" height="367"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="6sG-o0-8ez" id="FTR-k5-wKk">
-                                    <rect key="frame" x="0.0" y="0.0" width="320" height="366"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="366.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="atQ-YM-QKh">
+                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="atQ-YM-QKh">
                                             <rect key="frame" x="0.0" y="0.0" width="320" height="320"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" secondItem="atQ-YM-QKh" secondAttribute="height" multiplier="1:1" id="yXJ-dW-VZx"/>

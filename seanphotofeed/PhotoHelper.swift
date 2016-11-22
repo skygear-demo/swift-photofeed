@@ -104,6 +104,22 @@ class PhotoHelper {
         })
     }
     
+    static func delete(photo: Photo, onCompletion: @escaping (_ succeeded: Bool) -> Void) {
+        guard let record = SKYRecord(recordType: "photo", name: photo.recordName) else {
+            onCompletion(false)
+            return
+        }
+        
+        publicDB.deleteRecord(with: record.recordID, completionHandler: { deletedRecord, error in
+            if let error = error {
+                print("Error deleting record: \(error)")
+                onCompletion(false)
+            } else {
+                onCompletion(true)
+            }
+        })
+    }
+    
     static func addOneLike(to photo: Photo, onCompletion: @escaping (_ result: SKYRecord?) -> Void) {
         guard let record = SKYRecord(recordType: "photo", name: photo.recordName) else {
             onCompletion(nil)
@@ -116,16 +132,9 @@ class PhotoHelper {
                 print("Error adding like: \(error)")
                 onCompletion(nil)
             } else {
-                guard let savedRecord = savedRecord else {
-                    onCompletion(nil)
-                    return
-                }
-                
-                print(savedRecord)
                 onCompletion(savedRecord)
             }
         })
-        
     }
     
     static func resize(image: UIImage, maxWidth: CGFloat, quality: CGFloat = 1.0) -> Data? {

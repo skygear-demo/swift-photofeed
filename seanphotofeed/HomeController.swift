@@ -42,8 +42,7 @@ class HomeController: UITableViewController {
         
         cell.photoView.image = UIImage(named: "Placeholder")
         if let imageUrl = photo.imageUrl {
-            let request = URLRequest(url: imageUrl, cachePolicy: .returnCacheDataElseLoad, timeoutInterval: 5)
-            URLSession.shared.dataTask(with: request) { data, response, error in
+            URLSession.shared.dataTask(with: imageUrl) { data, response, error in
                 if let imageData = data {
                     DispatchQueue.main.async {
                         cell.photoView.image = UIImage(data: imageData)
@@ -53,6 +52,22 @@ class HomeController: UITableViewController {
         }
         
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let photo = photos[indexPath.row]
+            PhotoHelper.delete(photo: photo, onCompletion: { succeeded in
+                if succeeded {
+                    self.photos.remove(at: indexPath.row)
+                    self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                }
+            })
+        }
     }
     
     @IBAction func uploadButtonTapped(_ sender: Any) {
@@ -78,6 +93,7 @@ extension HomeController: UINavigationControllerDelegate, UIImagePickerControlle
             PhotoHelper.upload(imageData: resizedImageData, onCompletion: { succeeded in
                 if succeeded {
                     print("Upload succeeded")
+                    self.reloadPhotos()
                 } else {
                     print("Upload failed")
                 }
