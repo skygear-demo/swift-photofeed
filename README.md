@@ -46,6 +46,12 @@ In your case, you will replace *"vitaphotofeed"* with your *"{your_name}photofee
 After finishing scaffolding, we will be prompted with few questions to setup the project:
 
 ```sh
+What is your name?
+> <your_git_username>
+
+What is your email?
+> <your_git_email>
+
 What is your skygear endpoint (You can find it in portal)?
 Example: https://myapp.skygeario.com
 > https://vitaphotofeed.skygeario.com
@@ -53,6 +59,16 @@ Example: https://myapp.skygeario.com
 What is your skygear API key (You can find it in portal)?
 Example: dc0903fa85924776baa77df813901efc
 > <your-api-key>
+
+What language do you want to use?? [ Swift / ObjC ]
+> Swift
 ```
 
-The *skygear endpoint* and *skygear API key* information is located in the portal with the path *Info > Server Detail*. Just copy and paste the values into the questions.
+For name and email, enter the username and email your use for Git. The *skygear endpoint* and *skygear API key* information is located in the portal with the path *Info > Server Detail*. Just copy and paste the values to answer the questions. For language, type in *Swift*.  
+
+
+
+Upon answering all the questions, scaffolding will begin. After that, Xcode will open with the project Skygear scaffolded for you. You will be prompted whether to convert the syntax to the lastest Swift. Click on **Convert**, then choose **Convert to Swift 3**, then click **Next**.
+
+![xcode](Screenshots/xcode.png)
+
