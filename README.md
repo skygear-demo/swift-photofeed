@@ -31,4 +31,28 @@ Click on **Create App** when you are done. You will be directed to the app dashb
 
 
 
-For easier setup, we will show the steps here.
+For easier setup, we will show the steps here. Since we had Cocoapods installed, we will start by scaffolding the app. Open the Terminal on your Mac, navigate to the desired folder, and run the scaffolding command:
+
+
+
+```sh
+pod lib create --silent --template-url=https://github.com/SkygearIO/skygear-Scaffolding-iOS.git "vitaphotofeed"
+```
+
+In your case, you will replace *"vitaphotofeed"* with your *"{your_name}photofeed"*.
+
+
+
+After finishing scaffolding, we will be prompted with few questions to setup the project:
+
+```sh
+What is your skygear endpoint (You can find it in portal)?
+Example: https://myapp.skygeario.com
+> https://vitaphotofeed.skygeario.com
+
+What is your skygear API key (You can find it in portal)?
+Example: dc0903fa85924776baa77df813901efc
+> <your-api-key>
+```
+
+The *skygear endpoint* and *skygear API key* information is located in the portal with the path *Info > Server Detail*. Just copy and paste the values into the questions.
