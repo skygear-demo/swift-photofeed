@@ -11,6 +11,6 @@ Before getting started, here are the prerequisites:
 
 After signing up/logging in to the Skygear portal, you can see the screen below.
 
-![portal](/Users/sean/Documents/iOS/swift-photofeed/Screenshots/portal.png)
+![portal](Screenshots/portal.png)
 
 To create our photo feed app, just click on the + Create New App box.
