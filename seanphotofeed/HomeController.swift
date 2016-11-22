@@ -37,6 +37,7 @@ class HomeController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "PhotoCell", for: indexPath) as! PhotoTableViewCell
         
         let photo = photos[indexPath.row]
+        cell.photo = photo
         cell.likesLabel.text = photo.likesToString
         
         cell.photoView.image = UIImage(named: "Placeholder")
@@ -49,13 +50,6 @@ class HomeController: UITableViewController {
                     }
                 }
             }.resume()
-//            URLSession.shared.dataTask(with: imageUrl) { data, response, error in
-//                if let imageData = data {
-//                    DispatchQueue.main.async {
-//                        cell.photoView.image = UIImage(data: imageData)
-//                    }
-//                }
-//            }.resume()
         }
         
         return cell

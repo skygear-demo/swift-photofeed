@@ -36,7 +36,7 @@ class PhotoHelper {
 //                        let imageAsset = record.object(forKey: "asset") as? SKYAsset else {
 //                            continue
 //                    }
-//                    let photo = Photo(imageUrl: imageAsset.url)
+//                    let photo = Photo(id: record.recordID, imageUrl: imageAsset.url)
 //                    photo.likes = likes
 //                    photos.append(photo)
 //                }
@@ -59,7 +59,7 @@ class PhotoHelper {
                         let imageAsset = record.object(forKey: "asset") as? SKYAsset else {
                         continue
                     }
-                    let photo = Photo(imageUrl: imageAsset.url)
+                    let photo = Photo(recordName: record.recordID.recordName, imageUrl: imageAsset.url)
                     photo.likes = likes
                     photos.append(photo)
                 }
@@ -104,6 +104,29 @@ class PhotoHelper {
         })
     }
     
+    static func addOneLike(to photo: Photo, onCompletion: @escaping (_ result: SKYRecord?) -> Void) {
+        guard let record = SKYRecord(recordType: "photo", name: photo.recordName) else {
+            onCompletion(nil)
+            return
+        }
+        let newLikes = photo.likes + 1
+        record.setObject(newLikes, forKey: "likes" as NSCopying!)
+        publicDB.save(record, completion: { savedRecord, error in
+            if let error = error {
+                print("Error adding like: \(error)")
+                onCompletion(nil)
+            } else {
+                guard let savedRecord = savedRecord else {
+                    onCompletion(nil)
+                    return
+                }
+                
+                print(savedRecord)
+                onCompletion(savedRecord)
+            }
+        })
+        
+    }
     
     static func resize(image: UIImage, maxWidth: CGFloat, quality: CGFloat = 1.0) -> Data? {
         var actualWidth = image.size.width

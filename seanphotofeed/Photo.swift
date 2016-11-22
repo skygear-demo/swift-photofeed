@@ -7,9 +7,10 @@
 //
 
 import UIKit
+import SKYKit
 
 class Photo {
-    
+    var recordName: String
     var imageUrl: URL?
     
     var likes: Int = 0
@@ -25,7 +26,8 @@ class Photo {
         }
     }
     
-    init(imageUrl: URL) {
+    init(recordName: String, imageUrl: URL) {
+        self.recordName = recordName
         self.imageUrl = imageUrl
     }
     
