@@ -41,13 +41,21 @@ class HomeController: UITableViewController {
         
         cell.photoView.image = UIImage(named: "Placeholder")
         if let imageUrl = photo.imageUrl {
-            URLSession.shared.dataTask(with: imageUrl) { data, response, error in
+            let request = URLRequest(url: imageUrl, cachePolicy: .returnCacheDataElseLoad, timeoutInterval: 5)
+            URLSession.shared.dataTask(with: request) { data, response, error in
                 if let imageData = data {
                     DispatchQueue.main.async {
                         cell.photoView.image = UIImage(data: imageData)
                     }
                 }
             }.resume()
+//            URLSession.shared.dataTask(with: imageUrl) { data, response, error in
+//                if let imageData = data {
+//                    DispatchQueue.main.async {
+//                        cell.photoView.image = UIImage(data: imageData)
+//                    }
+//                }
+//            }.resume()
         }
         
         return cell

@@ -15,11 +15,34 @@ class PhotoHelper {
     static let publicDB = SKYContainer.default().publicCloudDatabase!
     
     static func retrieveAll(onCompletion: @escaping (_ result: [Photo]) -> Void) {
-        let query = SKYQuery(recordType: "photo", predicate: nil)
-//        let sortDescriptor = NSSortDescriptor(key: "created_at", ascending: false)
-//        query?.sortDescriptors = [sortDescriptor]
+        let query = SKYQuery(recordType: "photo", predicate: NSPredicate(format: "likes >= 0"))
+        let sortDescriptor = NSSortDescriptor(key: "_created_at", ascending: false)
+        query?.sortDescriptors = [sortDescriptor]
         
         var photos = [Photo]()
+        
+//        publicDB.performCachedQuery(query!, completionHandler: { assets, cached, error in
+//            if let error = error {
+//                print("Error retrieving photos: \(error)")
+//                onCompletion(photos)
+//            } else {
+//                guard let assets = assets else {
+//                    onCompletion(photos)
+//                    return
+//                }
+//                for asset in assets {
+//                    guard let record = asset as? SKYRecord,
+//                        let likes = record.object(forKey: "likes") as? Int,
+//                        let imageAsset = record.object(forKey: "asset") as? SKYAsset else {
+//                            continue
+//                    }
+//                    let photo = Photo(imageUrl: imageAsset.url)
+//                    photo.likes = likes
+//                    photos.append(photo)
+//                }
+//                onCompletion(photos)
+//            }
+//        })
         
         publicDB.perform(query!, completionHandler: { assets, error in
             if let error = error {
