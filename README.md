@@ -265,5 +265,8 @@ You will notice that there is a *"Login"* word at the top left corner of the **B
 
 Run the app on simulator again. Now you will have a clean back button.
 
- ## Laying out the Design of Home UITableViewController
+## Laying out the Design of Home UITableViewController
 
+Before mingling with the storyboard, let's first import the required icons into Xcode. You can download the required icons [here](IconAssets.zip). Once downloaded, open **Images.scassets** in Xcode, then add **Love** and **Placeholder** image assets. Finally, drag and drop the downloaded icons into each of the image asset according to their sizes.
+
+![xcode8](Screenshots/xcode8.png)
