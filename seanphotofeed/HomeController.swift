@@ -89,7 +89,7 @@ extension HomeController: UINavigationControllerDelegate, UIImagePickerControlle
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage,
-            let resizedImageData = PhotoHelper.resize(image: pickedImage, maxWidth: 1080) {
+            let resizedImageData = PhotoHelper.resize(image: pickedImage, maxWidth: 800, quality: 0.9) {
             PhotoHelper.upload(imageData: resizedImageData, onCompletion: { succeeded in
                 if succeeded {
                     print("Upload succeeded")
