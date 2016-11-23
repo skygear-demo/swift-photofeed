@@ -26,7 +26,7 @@ class HomeController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UIScreen.main.bounds.width + 8 + 21 + 20
+        return UIScreen.main.bounds.width + 8 + 12 + 21 + 20
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

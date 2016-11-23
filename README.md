@@ -270,3 +270,12 @@ Run the app on simulator again. Now you will have a clean back button.
 Before mingling with the storyboard, let's first import the required icons into Xcode. You can download the required icons [here](IconAssets.zip). Once downloaded, open **Images.scassets** in Xcode, then add **Love** and **Placeholder** image assets. Finally, drag and drop the downloaded icons into each of the image asset according to their sizes.
 
 ![xcode8](Screenshots/xcode8.png)
+
+Now, it's time to make the layout for our photo feeds. First, open **Main.storyboard**. Then, lay out the design by:
+
+![xcode9](Screenshots/xcode9.png)
+
+1. Drag the height of the **UITableViewCell** to appropriate height. We have a square **UIImageView**, 8px from top, and a **UILabel** 12px below the  **UIImageView**, of height 21px, and 20px to the bottom of the **UITableViewCell**. So the appropriate height for an iPhone 7 (screen width 375px) = *8px + 375px + 12px + 21px + 20px = 436px*
+2. Drag and drop a **UIImageView** into the **UITableViewCell**. Add constraints so that the **UIImageView** is 8px from top, 0px to both left and right, and with an aspect ratio of 1:1. For attributes, set the image of the **UIImageView** as the *"Placeholder"* image asset we imported just now. Next, tick on the *Clip To Bounds* option and choose the content mode as *Aspect Fill*.
+3. Drag and drop a **UILabel** below the **UIImageView**. Add constraints so that the **UILabel** is 12px below the **UIImageView**, 16px to both left and right, and 20px above the bottom of the **UITableViewCell**. Next, make the text align right, set the font weight to *Medium* and font size to 13, and the content of the text as *"--"*.
+4. Drag another **UIImageView** into the **UITableViewCell**. Add constraints so that the **UIImageView** is 125px width by 125px height, centered both vertically and horizontally in the **Placeholder UIImageView**. Next, set the image of the **UIImageView** as the *"Love"* image asset, and choose the content mode as *Aspect Fit*.
