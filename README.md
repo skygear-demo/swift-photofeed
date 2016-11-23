@@ -200,6 +200,70 @@ In Xcode, open **Main.storyboard** in the project navigator. By default, the **L
 2. Detach the connected **UITableViewController** from the **UINavigationController**.
 3. Make the **UINavigationController** the initial view controller of the app.
 4. Make the **Login UIViewController** the root view controller of the **UINavigationController.**
-5. Connect the **Login UIViewController** with the detached **UITableViewController** with a push segue, and name the segue identifier as *"login_to_home_segue"*.
-6. Change the **UINavigationBar title** of the **Login UIViewController** to *"Login"*. Drag and drop a **Bar Button Item** onto the top right of the **UINavigationBar** and name it *"Proceed"*.
-7. Change the **UINavigationBar title** of the **Home UITableViewController** to *"Home"*. Drag and drop a **Bar Button Item** onto the top right of the **UINavigationBar** and make it a system icon *Add*.
+5. Change the **UINavigationBar title** of the **Login UIViewController** to *"Login"*. Drag and drop a **Bar Button Item** onto the top right of the **UINavigationBar** and name it *"Proceed"*.
+6. Change the **UINavigationBar title** of the **Home UITableViewController** to *"Home"*. Drag and drop a **Bar Button Item** onto the top right of the **UINavigationBar** and make it a system icon *Add*.
+7. Connect the **Proceed Button** of the **Login UIViewController** to the detached **Home UITableViewController** with a default show segue. (By selecting the **Proceed Button** and *Ctrl + Drag* to the **Home UITableViewController**)
+
+There you go, the overall layout is done!
+
+## Working on Login UIViewController
+
+Most of the logic for the **Login UIViewController** has already been scaffolded for you in the corresponding file **ViewController.swift**. What we need to implement is to show/hide the **Proceed button** after users signed up, logged in, and logged out of the app.
+
+To do this, we will open the side-by-side view. First, open **Main.storyboard**, and select **Login UIViewController**. Then, click on the **Assistant Editor** (the one on top right corner of Xcode, with two circles tangled together). Now you will have a side-by-side view of the storyboard layout of **Login UIViewController** and the logic file **ViewController.swift**.
+
+![xcode7](Screenshots/xcode7.png)
+
+Press **Ctrl** and click on the **Proceed Button** at the same time, then drag it to **ViewController.swift** right below the line:
+
+```swift
+@IBOutlet weak var loginStatusLabel: UILabel!
+```
+
+Enter the name *"proceedButton"* in the name field of the pop out box, then click **Connect**. You've successfully connected **Proceed Button** to the logic file.
+
+We need to implement the show/hide logic of the **Proceed Button** whenver the login status is updated; therefore, we will write it in the following function:
+
+```swift
+func updateLoginStatus() {
+        if ((SKYContainer.default().currentUserRecordID) != nil) {
+            loginStatusLabel.text = "Logged in"
+            loginButton.isEnabled = false
+            signupButton.isEnabled = false
+            logoutButton.isEnabled = true
+            
+            proceedButton.title = "Proceed" // 1
+            proceedButton.isEnabled = true // 2
+        } else {
+            loginStatusLabel.text = "Not logged in"
+            loginButton.isEnabled = true
+            signupButton.isEnabled = true
+            logoutButton.isEnabled = false
+            
+            proceedButton.title = "" // 3
+            proceedButton.isEnabled = false // 4
+        }
+    }
+```
+
+Line numbered 1, 2, 3, 4 are what we need to add to the existing function **updateLoginStatus()**. Line 1 and 2 are used to show the **Proceed Button** when users are logged in, while Line 3 and 4 are used to hide the **Proceed Button** when users are not logged in / logged out.
+
+Click and run the app on a simulator. Sign up for an account, or log in if you've already created one. Then, tap on the **Proceed Button**.
+
+![simulator](Screenshots/simulator.png)
+
+You will notice that there is a *"Login"* word at the top left corner of the **Back Button** as in the left picture above. To remove the *"Login"* word, we will add the following lines in **ViewController.swift**, right below the *override func viewDidLoad()*:
+
+```swift
+      override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Remove text from back button on next controller
+        let backBarButtonItem = UIBarButtonItem()
+        backBarButtonItem.title = ""
+        navigationItem.backBarButtonItem = backBarButtonItem
+    }
+```
+
+Run the app on simulator again. Now you will have a clean back button.
+
+ ## Laying out the Design of Home UITableViewController
+
