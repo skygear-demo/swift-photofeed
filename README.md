@@ -187,3 +187,19 @@ pod install
 ```
 
 Finally, we're done setting up the project. You can now re-open the project by double clicking on *{your_name}photofeed.xcworkspace* using **Finder**.
+
+## Laying out the Overall Design
+
+![xcode6](Screenshots/xcode6.png)
+
+The picture above show the storyboard of the photo feed app. We will have a **UINavigationController** as the main navigator of the app, and a **Login UIViewController** as the root controller of the navigation controller. Once the user has logged in, he/she can proceed to the **Home UITableViewController**.
+
+In Xcode, open **Main.storyboard** in the project navigator. By default, the **Login UIViewController** has already been scaffolded for you. What you need to do are:
+
+1. Drag and drop a **UINavigationController** into the storyboard.
+2. Detach the connected **UITableViewController** from the **UINavigationController**.
+3. Make the **UINavigationController** the initial view controller of the app.
+4. Make the **Login UIViewController** the root view controller of the **UINavigationController.**
+5. Connect the **Login UIViewController** with the detached **UITableViewController** with a push segue, and name the segue identifier as *"login_to_home_segue"*.
+6. Change the **UINavigationBar title** of the **Login UIViewController** to *"Login"*. Drag and drop a **Bar Button Item** onto the top right of the **UINavigationBar** and name it *"Proceed"*.
+7. Change the **UINavigationBar title** of the **Home UITableViewController** to *"Home"*. Drag and drop a **Bar Button Item** onto the top right of the **UINavigationBar** and make it a system icon *Add*.
