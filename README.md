@@ -265,6 +265,57 @@ You will notice that there is a *"Login"* word at the top left corner of the **B
 
 Run the app on simulator again. Now you will have a clean back button.
 
+## Give Photo a Structure
+
+A photo is some kind of data we retrieve from the internet. We will retrieve a list of photos from the internet and show them in our app, so we need a structure to store these *photos*. To do that, we will create a **class** for photo. First, create a new file named *"Photo.swift"*:
+
+```swift
+import UIKit
+
+class Photo {
+    var recordName: String
+    var imageUrl: URL?
+    var likes: Int = 0
+    
+    init(recordName: String) {
+        self.recordName = recordName
+    }   
+}
+```
+
+Every **Photo** will have a unique identifier, which is the *recordName*. It also contains a *URL* for the its image, and the *number of likes* of for it. The *"init(recordName: String)"* function is used to initialise a **Photo**. To make parsing the *number of likes* for string display easier, we will add a helper variable like this:
+
+```swift
+class Photo {
+    var recordName: String
+    var imageUrl: URL?
+    var likes: Int = 0
+    
+    var likesToString: String {
+        get {
+            if likes == 0 {
+                return "No like yet"
+            } else if likes == 1 {
+                return "\(likes) Like"
+            } else {
+                return "\(likes) Likes"
+            }
+        }
+    }
+    
+    init(recordName: String) {
+        self.recordName = recordName
+    }
+    
+}
+```
+
+ The *"likesToString: String"* variable will parse a gramatically correct string whenever it is called. This make our code more tidy.
+
+## Core: the SKYKit
+
+
+
 ## Laying out the Design of Home UITableViewController
 
 Before mingling with the storyboard, let's first import the required icons into Xcode. You can download the required icons [here](IconAssets.zip). Once downloaded, open **Images.scassets** in Xcode, then add **Love** and **Placeholder** image assets. Finally, drag and drop the downloaded icons into each of the image asset according to their sizes.
@@ -279,3 +330,36 @@ Now, it's time to make the layout for our photo feeds. First, open **Main.storyb
 2. Drag and drop a **UIImageView** into the **UITableViewCell**. Add constraints so that the **UIImageView** is 8px from top, 0px to both left and right, and with an aspect ratio of 1:1. For attributes, set the image of the **UIImageView** as the *"Placeholder"* image asset we imported just now. Next, tick on the *Clip To Bounds* option and choose the content mode as *Aspect Fill*.
 3. Drag and drop a **UILabel** below the **UIImageView**. Add constraints so that the **UILabel** is 12px below the **UIImageView**, 16px to both left and right, and 20px above the bottom of the **UITableViewCell**. Next, make the text align right, set the font weight to *Medium* and font size to 13, and the content of the text as *"--"*.
 4. Drag another **UIImageView** into the **UITableViewCell**. Add constraints so that the **UIImageView** is 125px width by 125px height, centered both vertically and horizontally in the **Placeholder UIImageView**. Next, set the image of the **UIImageView** as the *"Love"* image asset, and choose the content mode as *Aspect Fit*.
+
+## Setup Photo Table View Cell
+
+We have laid out the UI for the **Photo Table View Cell**. Now we need to set up the logic of it. First, create a new file named *"PhotoTableViewCell.swift"*. In the file, declare the class for the **Photo Table View Cell** as followed:
+
+```swift
+import UIKit
+
+class PhotoTableViewCell: UITableViewCell {
+    
+}
+```
+
+Now, we have to connect the **Photo Table View Cell** on the storyboard to the one in this *"PhotoTableViewCell.swift"* file. Therefore, in **Main.storyboard**, click on the **Photo Table View Cell**, in its **Identity inspector** select its class as **PhotoTableViewCell**. After that, you can open the **Assistant editor** (side-by-side pane), if *"PhotoTableViewCell.swift"* is not shown automatically on the right pane, you can select it manually. You need to drag and drop each elements of the into the *"PhotoTableViewCell.swift"* as followed:
+
+```swift
+import UIKit
+
+class PhotoTableViewCell: UITableViewCell {
+    
+    @IBOutlet weak var photoView: UIImageView! // For the photo image view
+    @IBOutlet weak var loveView: UIImageView! // For the love icon image view
+    @IBOutlet weak var likesLabel: UILabel! // For the number of likes label
+    
+}
+```
+
+Now, we set up a **double tap gesture recognizer** to the **Photo Table View Cell** to handle the like action from user:
+
+```swift
+
+```
+
