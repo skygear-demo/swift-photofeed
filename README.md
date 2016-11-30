@@ -380,7 +380,7 @@ That is it. Now we can write the functions for the 4 actions for Skygear: *uploa
 Quick Notes:
 
 - We will be using the **Public DB** of Skygear, so that all users can access to all the photos posted
-- We are using **onCompletion handler** in the 4 functions below. This is because it takes time for network requests to finish, especially when uploading photos. These 4 functions basically wait for network requests to finish only then return a value. To know more about **onCompletion handle**, you can read [this](https://grokswift.com/completion-handlers-in-swift/).
+- We are using **onCompletion handler** in the 4 functions below. This is because it takes time for network requests to finish, especially when uploading photos. These 4 functions basically wait for network requests to finish only then return a value. To know more about **onCompletion handler**, you can read [this](https://grokswift.com/completion-handlers-in-swift/).
 - In Skygear, a **SKYAsset** and **SKYRecord** are stored differently. Hence, we upload a photo as **SKYAsset**, then only we create a new **SKYRecord** to link to the **SKYAsset**.
 
 ```swift
@@ -621,3 +621,289 @@ class PhotoTableViewCell: UITableViewCell {
 }
 ```
 
+## The Meat: Home Controller
+
+We have done most of the behind-the-scene logic from the app. Now, it's time to work on the main interface of the app: the **Home Controller**. 
+
+iOS is a very secure system. It will protect user data and we can't just simply get the photos from our users' iPhone without their permission. Hence, let's add a **privacy setting** in the *SupportingFile > Info.plist* to seek permission from the user the let us access their **photo library**.
+
+In *Info.plist*, add **Privacy - Photo Library Usage Description** - *We need to access your photo library*. You can use other string value for the reason field here.
+
+![xcode10](Screenshots/xcode10.png)
+
+To work on the **Home Controller**, create a new file named *"HomeController.swift"*:
+
+```swift
+import UIKit
+
+class HomeController: UITableViewController {
+    
+}
+```
+
+Open **Main.storyboard**, click on the **Home Table View Controller**, and
+
+1. Set its class as **HomeController**
+2. Drag and drop **Plus bar button item** to **HomeController.swift** as an *IBAction*, and name it *"uploadButtonTapped"*.
+
+```swift
+import UIKit
+
+class HomeController: UITableViewController {
+    
+    @IBAction func uploadButtonTapped(_ sender: Any) {
+    }
+    
+}
+```
+
+Now, we will handle image selection and image upload when the user taps on the **Plus bar button item**. To do that, let's create an **HomeController extension**:
+
+- Create a **photos** variable of type **[Photo]** to store all the photos retrieved from server
+- Create the *reloadPhotos()* function to retrieve all photos and refresh the table once finished
+
+
+- Create the function *presentImagePicker()* to present a photo gallery for user to pick an image from
+- Implement the delegate method *..didFinishPickingMediaWithInfo…* to decide what to do after user finishing picking an image
+- Add the function *presentImagePicker()* back into the *uploadButtonTapped(_ sender: Any)* function.
+
+```swift
+import UIKit
+
+class HomeController: UITableViewController {
+    
+    var photos = [Photo]()
+    
+    func reloadPhotos() {
+        PhotoHelper.retrieveAll(onCompletion: { result in
+            self.photos = result
+            self.tableView.reloadData()
+        })
+    }
+    
+    @IBAction func uploadButtonTapped(_ sender: Any) {
+        presentImagePicker()
+    }
+    
+}
+
+extension HomeController: UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+    
+    func presentImagePicker() {
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        imagePicker.modalPresentationStyle = .popover
+        imagePicker.allowsEditing = false
+        imagePicker.sourceType = .photoLibrary
+        present(imagePicker, animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage,
+            let resizedImageData = PhotoHelper.resize(image: pickedImage, maxWidth: 800, quality: 0.9) {
+            PhotoHelper.upload(imageData: resizedImageData, onCompletion: { succeeded in
+                if succeeded {
+                    print("Upload succeeded")
+                    self.reloadPhotos()
+                } else {
+                    print("Upload failed")
+                }
+            })
+        }
+        dismiss(animated: true, completion: {
+        })
+    }
+    
+}
+```
+
+Run the app in simulator. You should now be able to upload photo to the server.
+
+## Displaying Photos
+
+Why aren't the photos shown after we've retrieved them from server? It's because we haven't set up the table view to do that. We need to override the **delegate method** from **UITableViewDelegate** and **UITableViewDataSource**:
+
+```swift
+import UIKit
+
+class HomeController: UITableViewController {
+    
+    var photos = [Photo]()
+    
+    func reloadPhotos() {
+        PhotoHelper.retrieveAll(onCompletion: { result in
+            self.photos = result
+            self.tableView.reloadData()
+        })
+    }
+    
+    // Method 1: Decide height of each row
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UIScreen.main.bounds.width + 8 + 12 + 21 + 20
+    }
+    
+    // Method 2: Decide number of rows (number of photos)
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return photos.count
+    }
+    
+    // Method 3: Decide how to configure each row for display
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "PhotoCell", for: indexPath) as! PhotoTableViewCell
+        
+        let photo = photos[indexPath.row]
+        cell.photo = photo
+        cell.likesLabel.text = photo.likesToString
+        
+        cell.photoView.image = UIImage(named: "Placeholder")
+        if let imageUrl = photo.imageUrl {
+            URLSession.shared.dataTask(with: imageUrl) { data, response, error in
+                if let imageData = data {
+                    DispatchQueue.main.async {
+                        cell.photoView.image = UIImage(data: imageData)
+                    }
+                }
+                }.resume()
+        }
+        
+        return cell
+    }
+    
+    @IBAction func uploadButtonTapped(_ sender: Any) {
+        presentImagePicker()
+    }
+    
+}
+
+extension HomeController: UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+    
+    func presentImagePicker() {
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        imagePicker.modalPresentationStyle = .popover
+        imagePicker.allowsEditing = false
+        imagePicker.sourceType = .photoLibrary
+        present(imagePicker, animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage,
+            let resizedImageData = PhotoHelper.resize(image: pickedImage, maxWidth: 800, quality: 0.9) {
+            PhotoHelper.upload(imageData: resizedImageData, onCompletion: { succeeded in
+                if succeeded {
+                    print("Upload succeeded")
+                    self.reloadPhotos()
+                } else {
+                    print("Upload failed")
+                }
+            })
+        }
+        dismiss(animated: true, completion: {
+        })
+    }
+    
+}
+```
+
+Run your app again. You should be able to see the photos.
+
+## Swipe to Delete
+
+Our app looks pretty complete now. One last thing to do: enable swipe to delete photos. iOS has a pretty robust API so it is super easy to implement this. We just need to override 2 more **Delegate methods** of the table view:
+
+```swift
+import UIKit
+
+class HomeController: UITableViewController {
+    
+    var photos = [Photo]()
+    
+    func reloadPhotos() {
+        PhotoHelper.retrieveAll(onCompletion: { result in
+            self.photos = result
+            self.tableView.reloadData()
+        })
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UIScreen.main.bounds.width + 8 + 12 + 21 + 20
+    }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return photos.count
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "PhotoCell", for: indexPath) as! PhotoTableViewCell
+        
+        let photo = photos[indexPath.row]
+        cell.photo = photo
+        cell.likesLabel.text = photo.likesToString
+        
+        cell.photoView.image = UIImage(named: "Placeholder")
+        if let imageUrl = photo.imageUrl {
+            URLSession.shared.dataTask(with: imageUrl) { data, response, error in
+                if let imageData = data {
+                    DispatchQueue.main.async {
+                        cell.photoView.image = UIImage(data: imageData)
+                    }
+                }
+                }.resume()
+        }
+        
+        return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let photo = photos[indexPath.row]
+            PhotoHelper.delete(photo: photo, onCompletion: { succeeded in
+                if succeeded {
+                    self.photos.remove(at: indexPath.row)
+                    self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                }
+            })
+        }
+    }
+    
+    @IBAction func uploadButtonTapped(_ sender: Any) {
+        presentImagePicker()
+    }
+    
+}
+
+extension HomeController: UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+    
+    func presentImagePicker() {
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        imagePicker.modalPresentationStyle = .popover
+        imagePicker.allowsEditing = false
+        imagePicker.sourceType = .photoLibrary
+        present(imagePicker, animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage,
+            let resizedImageData = PhotoHelper.resize(image: pickedImage, maxWidth: 800, quality: 0.9) {
+            PhotoHelper.upload(imageData: resizedImageData, onCompletion: { succeeded in
+                if succeeded {
+                    print("Upload succeeded")
+                    self.reloadPhotos()
+                } else {
+                    print("Upload failed")
+                }
+            })
+        }
+        dismiss(animated: true, completion: {
+        })
+    }
+    
+}
+```
+
+Done! Our demo app is now completed.
