@@ -277,8 +277,9 @@ class Photo {
     var imageUrl: URL?
     var likes: Int = 0
     
-    init(recordName: String) {
+    init(recordName: String, imageUrl: URL) {
         self.recordName = recordName
+        self.imageUrl = imageUrl
     }   
 }
 ```
@@ -286,6 +287,8 @@ class Photo {
 Every **Photo** will have a unique identifier, which is the *recordName*. It also contains a *URL* for the its image, and the *number of likes* of for it. The *"init(recordName: String)"* function is used to initialise a **Photo**. To make parsing the *number of likes* for string display easier, we will add a helper variable like this:
 
 ```swift
+import UIKit
+
 class Photo {
     var recordName: String
     var imageUrl: URL?
@@ -303,8 +306,9 @@ class Photo {
         }
     }
     
-    init(recordName: String) {
+    init(recordName: String, imageUrl: URL) {
         self.recordName = recordName
+        self.imageUrl = imageUrl
     }
     
 }
@@ -313,6 +317,212 @@ class Photo {
  The *"likesToString: String"* variable will parse a gramatically correct string whenever it is called. This make our code more tidy.
 
 ## Core: the SKYKit
+
+There are few actions we will use Skygear for:
+
+1. Upload photo and create a record
+2. Delete photo record
+3. Add one like to the double-tapped photo
+4. Retrieve all photos to show on Home
+
+To do that, create a new file named *"PhotoHelper.swift"*. We will create a **Helper class** to help us manage these complex operations, so life will be easier. Notice that we also import **SKYKit** below import **UIKit** in this class file:
+
+```swift
+import UIKit
+import SKYKit
+
+class PhotoHelper {
+    
+    
+}
+```
+
+Imagine one user uploading a photo that is 4K to our server. This is going to take an unreasonable amount of time for uploading, retrieving, and taking up too many space to store. Therefore, before we upload the photo, we have to resize it to a proper size. To do that, we will write a resize function in **PhotoHelper**:
+
+```swift
+import UIKit
+import SKYKit
+
+class PhotoHelper {
+    
+    static func resize(image: UIImage, maxWidth: CGFloat, quality: CGFloat = 1.0) -> Data? {
+        var actualWidth = image.size.width
+        var actualHeight = image.size.height
+        let heightRatio = actualHeight / actualWidth
+        
+        print("FROM: \(actualWidth)x\(actualHeight) ratio \(heightRatio)")
+        
+        if actualWidth > maxWidth {
+            actualWidth = maxWidth
+            actualHeight = maxWidth * heightRatio
+        }
+        
+        print("TO: \(actualWidth)x\(actualHeight)")
+        
+        let rect = CGRect(x: 0, y: 0, width: actualWidth, height: actualHeight)
+        UIGraphicsBeginImageContext(rect.size)
+        image.draw(in: rect)
+        guard let img = UIGraphicsGetImageFromCurrentImageContext(),
+            let imageData = UIImageJPEGRepresentation(img, quality) else {
+                return nil
+        }
+        
+        return imageData
+    }
+    
+}
+```
+
+The *"static func resize(…)"* function above takes a **UIImage** and resize it according to specified **maximum width** and **quality**. Notice that it is a **static** function, meaning that we can use this function just by calling *PhotoHelper.resize(…)* from anywhere. This function will also return an **image data** of type **Data** for easier uploading to Skygear server.
+
+That is it. Now we can write the functions for the 4 actions for Skygear: *upload, delete, add one like, retrieve*.
+
+Quick Notes:
+
+- We will be using the **Public DB** of Skygear, so that all users can access to all the photos posted
+- We are using **onCompletion handler** in the 4 functions below. This is because it takes time for network requests to finish, especially when uploading photos. These 4 functions basically wait for network requests to finish only then return a value. To know more about **onCompletion handle**, you can read [this](https://grokswift.com/completion-handlers-in-swift/).
+- In Skygear, a **SKYAsset** and **SKYRecord** are stored differently. Hence, we upload a photo as **SKYAsset**, then only we create a new **SKYRecord** to link to the **SKYAsset**.
+
+```swift
+import UIKit
+import SKYKit
+
+class PhotoHelper {
+    
+    static let container = SKYContainer.default()!
+    static let publicDB = SKYContainer.default().publicCloudDatabase!
+    
+    // Action 1: Upload photo and create a record
+    static func upload(imageData: Data, onCompletion: @escaping (_ succeeded: Bool) -> Void) {
+        guard let asset = SKYAsset(data: imageData) else {
+            onCompletion(false)
+            return
+        }
+        
+        asset.mimeType = "image/jpg"
+        container.uploadAsset(asset, completionHandler: { uploadedAsset, error in
+            if let error = error {
+                print("Error uploading asset: \(error)")
+                onCompletion(false)
+            } else {
+                if let uploadedAsset = uploadedAsset {
+                    print("Asset uploaded: \(uploadedAsset)")
+                    let photo = SKYRecord(recordType: "photo")
+                    photo?.setObject(0, forKey: "likes" as NSCopying)
+                    photo?.setObject(uploadedAsset, forKey: "asset" as NSCopying)
+                    publicDB.save(photo!, completion: { record, error in
+                        if let error = error {
+                            // Error saving
+                            print("Error saving record: \(error)")
+                            onCompletion(false)
+                        } else {
+                            if let recordID = record?.recordID {
+                                print("Saved recor with RecordID: \(recordID)")
+                                onCompletion(true)
+                            }
+                        }
+                    })
+                } else {
+                    onCompletion(false)
+                }
+            }
+        })
+    }
+    
+    // Action 2: Delete photo record
+    static func delete(photo: Photo, onCompletion: @escaping (_ succeeded: Bool) -> Void) {
+        guard let record = SKYRecord(recordType: "photo", name: photo.recordName) else {
+            onCompletion(false)
+            return
+        }
+        
+        publicDB.deleteRecord(with: record.recordID, completionHandler: { deletedRecord, error in
+            if let error = error {
+                print("Error deleting record: \(error)")
+                onCompletion(false)
+            } else {
+                onCompletion(true)
+            }
+        })
+    }
+    
+    // Action 3: Add one like to photo record
+    static func addOneLike(to photo: Photo, onCompletion: @escaping (_ result: SKYRecord?) -> Void) {
+        guard let record = SKYRecord(recordType: "photo", name: photo.recordName) else {
+            onCompletion(nil)
+            return
+        }
+        let newLikes = photo.likes + 1
+        record.setObject(newLikes, forKey: "likes" as NSCopying!)
+        publicDB.save(record, completion: { savedRecord, error in
+            if let error = error {
+                print("Error adding like: \(error)")
+                onCompletion(nil)
+            } else {
+                onCompletion(savedRecord)
+            }
+        })
+    }
+    
+    // Action 4: Retrieve all photo records
+    static func retrieveAll(onCompletion: @escaping (_ result: [Photo]) -> Void) {
+        let query = SKYQuery(recordType: "photo", predicate: NSPredicate(format: "likes >= 0"))
+        let sortDescriptor = NSSortDescriptor(key: "_created_at", ascending: false)
+        query?.sortDescriptors = [sortDescriptor]
+        
+        var photos = [Photo]()
+        
+        publicDB.perform(query!, completionHandler: { assets, error in
+            if let error = error {
+                print("Error retrieving photos: \(error)")
+                onCompletion(photos)
+            } else {
+                guard let assets = assets else {
+                    onCompletion(photos)
+                    return
+                }
+                for asset in assets {
+                    guard let record = asset as? SKYRecord,
+                        let likes = record.object(forKey: "likes") as? Int,
+                        let imageAsset = record.object(forKey: "asset") as? SKYAsset else {
+                            continue
+                    }
+                    let photo = Photo(recordName: record.recordID.recordName, imageUrl: imageAsset.url)
+                    photo.likes = likes
+                    photos.append(photo)
+                }
+                onCompletion(photos)
+            }
+        })
+    }
+    
+    static func resize(image: UIImage, maxWidth: CGFloat, quality: CGFloat = 1.0) -> Data? {
+        var actualWidth = image.size.width
+        var actualHeight = image.size.height
+        let heightRatio = actualHeight / actualWidth
+        
+        print("FROM: \(actualWidth)x\(actualHeight) ratio \(heightRatio)")
+        
+        if actualWidth > maxWidth {
+            actualWidth = maxWidth
+            actualHeight = maxWidth * heightRatio
+        }
+        
+        print("TO: \(actualWidth)x\(actualHeight)")
+        
+        let rect = CGRect(x: 0, y: 0, width: actualWidth, height: actualHeight)
+        UIGraphicsBeginImageContext(rect.size)
+        image.draw(in: rect)
+        guard let img = UIGraphicsGetImageFromCurrentImageContext(),
+            let imageData = UIImageJPEGRepresentation(img, quality) else {
+                return nil
+        }
+        
+        return imageData
+    }
+    
+}
+```
 
 
 
@@ -359,7 +569,55 @@ class PhotoTableViewCell: UITableViewCell {
 
 Now, we set up a **double tap gesture recognizer** to the **Photo Table View Cell** to handle the like action from user:
 
-```swift
+- Hide the **Love icon** when the **Photo Table View Cell** is first loaded.
+- Add a **Double tap gesture recognizer** to the content view of the **Photo Table View Cell**
+- Add a *"doubleTapped(…)"* function to handle the double tap action from user, which is to animate the **Love icon** and send the *PhotoHelper.addOneLike(…)* request to the server.
 
+```swift
+import UIKit
+
+class PhotoTableViewCell: UITableViewCell {
+
+    var photo: Photo?
+    
+    @IBOutlet weak var photoView: UIImageView!
+    @IBOutlet weak var loveView: UIImageView!
+    @IBOutlet weak var likesLabel: UILabel!
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        loveView.isHidden = true
+        
+        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(doubleTapped(sender:)))
+        doubleTap.numberOfTapsRequired = 2
+        contentView.addGestureRecognizer(doubleTap)
+    }
+    
+    func doubleTapped(sender: UITapGestureRecognizer) {
+        guard let photo = photo else {
+            return
+        }
+        PhotoHelper.addOneLike(to: photo, onCompletion: { result in
+            if let likes = result?.object(forKey: "likes") as? Int {
+                photo.likes = likes
+                self.likesLabel.text = photo.likesToString
+            }
+        })
+        
+        loveView.isHidden = false
+        loveView.alpha = 0
+        UIView.animate(withDuration: 0.25, animations: {
+            self.loveView.alpha = 1
+        }, completion: { finished in
+            UIView.animate(withDuration: 0.25, delay: 0.1, options: .curveEaseInOut, animations: {
+                self.loveView.alpha = 0
+            }, completion: { finished in
+                self.loveView.isHidden = true
+            })
+        })
+    }
+
+}
 ```
 
