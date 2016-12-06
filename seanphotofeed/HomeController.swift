@@ -14,8 +14,11 @@ class HomeController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         reloadPhotos()
+        // Query change update
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "SkygearNotificationReceived"), object: nil, queue: OperationQueue.main) { (notification) in
+            self.reloadPhotos()
+        }
     }
     
     func reloadPhotos() {
@@ -93,7 +96,7 @@ extension HomeController: UINavigationControllerDelegate, UIImagePickerControlle
             PhotoHelper.upload(imageData: resizedImageData, onCompletion: { succeeded in
                 if succeeded {
                     print("Upload succeeded")
-                    self.reloadPhotos()
+//                    self.reloadPhotos()
                 } else {
                     print("Upload failed")
                 }
