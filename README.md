@@ -792,7 +792,6 @@ extension HomeController: UINavigationControllerDelegate, UIImagePickerControlle
             PhotoHelper.upload(imageData: resizedImageData, onCompletion: { succeeded in
                 if succeeded {
                     print("Upload succeeded")
-                    self.reloadPhotos()
                 } else {
                     print("Upload failed")
                 }
@@ -806,6 +805,86 @@ extension HomeController: UINavigationControllerDelegate, UIImagePickerControlle
 ```
 
 Run your app again. You should be able to see the photos.
+
+## Receive Notification
+
+Now, your app will not automatically update the photos in the table view after you've uploaded, or after anyone in the app has uploaded a new photo.
+
+We have to setup the app to receive notification from Skygear when there is an update. First, in **AppDelegate.swift**, do the following:
+
+- Make it conforms to **SKYContainerDelegate**
+
+```swift
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate, SKYContainerDelegate {
+```
+
+- Register the device to receive notification
+
+```swift
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+        // Override point for customization after application launch.
+        SKYContainer.default().configAddress("https://seanphotofeed.skygeario.com/")
+        SKYContainer.default().configure(withAPIKey: "xxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+        
+        // Add the code below
+        SKYContainer.default().delegate = self
+        SKYContainer.default().registerDeviceCompletionHandler({ deviceID, error in
+            if let error = error {
+                print("Failed to register device: \(error)")
+            } else {
+                print("Registered device: \(deviceID)")
+                self.addSubscription(deviceID!)
+            }
+        })
+        application.registerUserNotificationSettings(UIUserNotificationSettings())
+        application.registerForRemoteNotifications()
+        // End of code to add
+        
+        return true
+    }
+```
+
+- Add the **SKYContainerDelegate** methods
+
+```swift
+    func container(_ container: SKYContainer!, didReceive notification: SKYNotification!) {
+        print("Received notification: \(notification)");
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "SkygearNotificationReceived"), object: notification)
+    }
+    
+    func addSubscription(_ deviceID: String) {
+        let query = SKYQuery(recordType: "photo", predicate: nil)
+        let subscription = SKYSubscription(query: query, subscriptionID: "my photos")
+        
+        let operation = SKYModifySubscriptionsOperation(deviceID: deviceID, subscriptionsToSave: [subscription!])
+        operation?.deviceID = deviceID
+        operation?.modifySubscriptionsCompletionBlock = { (savedSubscriptions, operationError) in
+            DispatchQueue.main.async {
+                if let operationError = operationError {
+                    print(operationError)
+                }
+            }
+        };
+        SKYContainer.default().publicCloudDatabase.execute(operation)
+    }
+```
+
+Then, finally, in **HomeController.swift**, we need to setup the logic on what to do after receiving notification from Skygear:
+
+```swift
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        reloadPhotos()
+        
+        // Add the code below
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "SkygearNotificationReceived"), object: nil, queue: OperationQueue.main) { (notification) in
+            self.reloadPhotos()
+        }
+    }
+```
+
+Run the app again and upload a photo. You should see the table view being updated once your upload is completed.
 
 ## Swipe to Delete
 
